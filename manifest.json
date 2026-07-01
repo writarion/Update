@@ -1,0 +1,22 @@
+{
+  "name": "Meetwoyou — Social",
+  "short_name": "Meetwoyou",
+  "description": "Connect, share, call — your social home.",
+  "start_url": "./dashboard.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#7c3aed",
+  "lang": "en",
+  "icons": [
+    { "src": "./web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./web-app-manifest-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Messenger", "url": "./messenger.html", "icons":[{"src":"./web-app-manifest-192x192.png","sizes":"192x192"}] },
+    { "name": "Reels", "url": "./dashboard.html#reels" },
+    { "name": "Admin", "url": "./admin.html" }
+  ],
+  "categories": ["social","communication","lifestyle"]
+}

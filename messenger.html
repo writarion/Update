@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Meetwoyou Messenger</title>
+<link rel="manifest" href="./messenger-manifest.json">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+<link rel="shortcut icon" href="./favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+<style>
+:root{--primary:#0095f6;--bg:#0a0a0a;--card:#121212;--gray:#8e8e8e;--accent:#7c3aed}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.app{display:grid;grid-template-columns:340px 1fr;height:100vh}
+@media (max-width:780px){.app{grid-template-columns:1fr}.right{display:none}.app.open .left{display:none}.app.open .right{display:flex}}
+.left{background:#0d0d0d;border-right:1px solid #1f1f1f;display:flex;flex-direction:column;min-width:0}
+.right{display:flex;flex-direction:column;background:radial-gradient(circle at top right,#0a0a0a,#000);min-width:0}
+.head{padding:14px;border-bottom:1px solid #1f1f1f;display:flex;align-items:center;gap:12px;background:#0d0d0d;position:sticky;top:0;z-index:2}
+.head h2{margin:0;font-size:18px;font-weight:800;background:linear-gradient(90deg,#fff,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.search{padding:10px 14px}
+.search input{width:100%;background:#1a1a1a;border:1px solid #262626;border-radius:20px;padding:10px 14px;color:#fff;outline:none;font-size:13px}
+.list{flex:1;overflow-y:auto}
+.list::-webkit-scrollbar{width:6px} .list::-webkit-scrollbar-thumb{background:#262626;border-radius:3px}
+.chat-row{padding:12px 14px;display:flex;gap:12px;align-items:center;cursor:pointer;border-bottom:1px solid #161616;transition:.15s}
+.chat-row:hover{background:#161616}
+.chat-row.active{background:#1a2a3a}
+.chat-row img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.chat-row .meta{flex:1;min-width:0}
+.chat-row .meta .top{display:flex;justify-content:space-between;align-items:center}
+.chat-row b{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-row small{font-size:11px;color:var(--gray)}
+.chat-row .preview{font-size:12px;color:var(--gray);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;justify-content:space-between;align-items:center}
+.unread{background:var(--primary);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
+.v-badge{color:var(--primary);font-size:11px;margin-left:3px}
+.empty{padding:40px 20px;text-align:center;color:var(--gray)}
+.empty img{width:80px;opacity:.5;margin-bottom:14px}
+
+.thread-head{padding:12px 14px;border-bottom:1px solid #1f1f1f;display:flex;align-items:center;gap:12px;background:rgba(13,13,13,.95);backdrop-filter:blur(10px)}
+.thread-head img{width:42px;height:42px;border-radius:50%;object-fit:cover}
+.thread-head .info{flex:1;min-width:0}
+.thread-head .info b{font-size:15px}
+.thread-head .info small{font-size:11px;color:var(--gray);display:block}
+.thread-head .actions{display:flex;gap:18px;color:var(--primary)}
+.thread-head .actions i{cursor:pointer;font-size:18px}
+.back-mobile{display:none;cursor:pointer;font-size:18px;margin-right:6px}
+@media (max-width:780px){.back-mobile{display:inline}}
+
+.msgs{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:2px}
+.bubble{padding:9px 13px;border-radius:18px;max-width:70%;font-size:14px;position:relative;word-wrap:break-word;animation:pop .25s}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.bubble.sent{background:linear-gradient(135deg,#0095f6,#1d4ed8);align-self:flex-end;border-bottom-right-radius:4px}
+.bubble.recv{background:#262626;align-self:flex-start;border-bottom-left-radius:4px}
+.bubble .ts{display:block;font-size:10px;color:rgba(255,255,255,.65);margin-top:4px;text-align:right}
+.bubble img,.bubble video{max-width:260px;border-radius:12px;display:block;margin-top:4px}
+.react-pill{position:absolute;bottom:-10px;right:6px;background:#1a1a1a;border:1px solid #333;padding:1px 7px;border-radius:14px;font-size:14px;line-height:1}
+.sent .react-pill{right:auto;left:6px}
+.voice{display:flex;align-items:center;gap:10px;min-width:170px;padding:6px 4px}
+.voice i{font-size:22px;cursor:pointer}
+.voice .wave{flex:1;height:3px;background:rgba(255,255,255,.25);border-radius:2px;overflow:hidden}
+.voice .wave i{display:block;height:100%;width:0;background:#fff;transition:width .2s}
+.typing-dots{display:inline-flex;gap:4px;padding:10px 14px;background:#262626;border-radius:18px;align-self:flex-start}
+.typing-dots span{width:6px;height:6px;background:#888;border-radius:50%;animation:bounce 1.2s infinite}
+.typing-dots span:nth-child(2){animation-delay:.15s} .typing-dots span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+
+.composer{padding:10px;display:flex;align-items:center;gap:10px;background:#121212;border-top:1px solid #1f1f1f}
+.composer i{color:var(--primary);font-size:20px;cursor:pointer;padding:6px}
+.composer input{flex:1;background:#1a1a1a;border:none;border-radius:22px;padding:10px 16px;color:#fff;outline:none;font-size:14px;font-family:inherit}
+.composer input::placeholder{color:#666}
+.online-dot{display:inline-block;width:9px;height:9px;background:#22c55e;border-radius:50%;margin-right:4px}
+
+.no-thread{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gray);text-align:center;padding:20px}
+.no-thread img{width:100px;opacity:.6;margin-bottom:18px}
+#loader{position:fixed;inset:0;background:#0a0a0a;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s}
+#loader.hide{opacity:0;pointer-events:none}
+.spinner{width:34px;height:34px;border:3px solid #262626;border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="spinner"></div></div>
+
+<div class="app" id="app">
+  <aside class="left">
+    <div class="head">
+      <a href="./dashboard.html" style="color:#fff;text-decoration:none"><i class="fas fa-arrow-left"></i></a>
+      <h2>Messenger</h2>
+      <i class="fas fa-edit" style="margin-left:auto;color:var(--primary);cursor:pointer" onclick="newChat()"></i>
+    </div>
+    <div class="search"><input id="srch" placeholder="Search chats..." oninput="renderList()"></div>
+    <div class="list" id="chat-list"></div>
+  </aside>
+
+  <section class="right" id="right">
+    <div class="no-thread" id="no-thread">
+      <img src="./web-app-manifest-192x192.png" alt="">
+      <h2 style="margin:0 0 6px;color:#fff">Your Messages</h2>
+      <p>Pick a conversation on the left, or start a new one.</p>
+    </div>
+
+    <div id="thread" style="display:none;flex-direction:column;height:100%">
+      <div class="thread-head">
+        <i class="fas fa-arrow-left back-mobile" onclick="closeThread()"></i>
+        <img id="t-img" src="">
+        <div class="info"><b id="t-name"></b><small id="t-status">offline</small></div>
+        <div class="actions">
+          <i class="fas fa-phone-alt" onclick="MW.startCall(firebaseDB,me,active,document.getElementById('t-name').innerText,'audio')" title="Audio call"></i>
+          <i class="fas fa-video" onclick="MW.startCall(firebaseDB,me,active,document.getElementById('t-name').innerText,'video')" title="Video call"></i>
+          <i class="fas fa-ban" onclick="MWBlockUser(active,document.getElementById('t-name').innerText)" title="Block user"></i>
+          <i class="fas fa-info-circle" onclick="threadInfo()"></i>
+        </div>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="composer">
+        <label><i class="fas fa-image"></i><input type="file" id="file" accept="image/*,video/*" hidden onchange="sendMedia(this)"></label>
+        <i id="mic" class="fas fa-microphone" onmousedown="startRec()" onmouseup="stopRec()" ontouchstart="startRec()" ontouchend="stopRec()"></i>
+        <input id="text" placeholder="Type a message..." oninput="onType()" onkeydown="if(event.key==='Enter')send()">
+        <i class="far fa-paper-plane" onclick="send()"></i>
+      </div>
+      <div id="rec-timer" style="display:none;position:fixed;left:50%;bottom:78px;transform:translateX(-50%);z-index:50;background:#111827;border:1px solid #374151;border-radius:999px;padding:9px 14px;font-weight:800;color:#fff"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;margin-right:8px"></span><span id="rec-time">00:00</span></div>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot, query, orderBy, addDoc, serverTimestamp, writeBatch, deleteDoc, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = { apiKey:"AIzaSyBn3x2qSo8k6a9wrxNfLmVliWMmsUk8wfY", authDomain:"meetwoyou-436a2.firebaseapp.com", projectId:"meetwoyou-436a2", storageBucket:"meetwoyou-436a2.firebasestorage.app", messagingSenderId:"612788132077", appId:"1:612788132077:web:0a8b92edf26778efd4d4e4" };
+const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app); window.firebaseAuth=auth; window.firebaseDB=db;
+
+let me=null, active=null, allUsers=[], allMsgs=[], chatUnsub=null, statusUnsub=null, typeUnsub=null, typeTimer=null, recTimer=null, recStarted=0;
+const vB = v => v?'<i class="fas fa-check-circle v-badge"></i>':'';
+const esc = s => (s||'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const timeAgo = ts => { if(!ts)return ''; const d=ts instanceof Timestamp?ts.toDate():new Date(ts); const s=Math.floor((Date.now()-d)/1000); if(s<60)return 'now'; if(s<3600)return Math.floor(s/60)+'m'; if(s<86400)return Math.floor(s/3600)+'h'; return d.toLocaleDateString(); };
+
+onAuthStateChanged(auth, async u => {
+  if(!u){ location.href='index.html'; return; }
+  me = u; window.currentUser = u; window.MWme = u; window.MW?.watchIncomingCalls?.(db, u);
+  setTimeout(()=>document.getElementById('loader').classList.add('hide'), 400);
+  onSnapshot(collection(db,'users'), s => { allUsers = s.docs.map(d=>({id:d.id,...d.data()})); renderList(); });
+  onSnapshot(query(collection(db,'messages'),orderBy('timestamp','desc')), s => { allMsgs = s.docs.map(d=>({id:d.id,...d.data()})); renderList(); if(active) renderThread(); });
+});
+
+function renderList(){
+  if(!allUsers.length) return;
+  const term = document.getElementById('srch').value.toLowerCase();
+  const map = new Map();
+  allMsgs.forEach(m => {
+    if (m.sender!==me.uid && m.receiver!==me.uid) return;
+    const ot = m.sender===me.uid?m.receiver:m.sender;
+    if (!map.has(ot)) map.set(ot, { last:m, unread:(m.receiver===me.uid&&!m.seen)?1:0 });
+    else if (m.receiver===me.uid && !m.seen) map.get(ot).unread++;
+  });
+  const list = document.getElementById('chat-list');
+  if (!map.size){ list.innerHTML='<div class="empty"><img src="./web-app-manifest-192x192.png"><div>No chats yet</div></div>'; return; }
+  const rows = [];
+  for (const [uid,d] of map){
+    const u = allUsers.find(x=>x.id===uid); if(!u) continue;
+    if (term && !u.displayName?.toLowerCase().includes(term)) continue;
+    const prev = d.last.text || (d.last.mediaType?`Sent a ${d.last.mediaType}`:'Media');
+    const on = u.lastActive?.toDate && (Date.now()-u.lastActive.toDate()<300000);
+    rows.push(`<div class="chat-row ${active===uid?'active':''}" onclick="openChat('${uid}')">
+      <img src="${u.photoURL||'./web-app-manifest-192x192.png'}">
+      <div class="meta"><div class="top"><b>${esc(u.displayName||'')}${vB(u.isVerified)}</b><small>${timeAgo(d.last.timestamp)}</small></div>
+      <div class="preview"><span>${on?'<span class="online-dot"></span>':''}${esc(prev)}</span>${d.unread?`<span class="unread">${d.unread}</span>`:''}</div></div></div>`);
+  }
+  list.innerHTML = rows.join('') || '<div class="empty">No matches</div>';
+}
+
+window.openChat = async uid => {
+  active = uid;
+  document.getElementById('app').classList.add('open');
+  document.getElementById('no-thread').style.display='none';
+  document.getElementById('thread').style.display='flex';
+  const u = allUsers.find(x=>x.id===uid); if(!u) return;
+  document.getElementById('t-img').src = u.photoURL || './web-app-manifest-192x192.png';
+  document.getElementById('t-name').innerHTML = esc(u.displayName||'') + vB(u.isVerified);
+  if (statusUnsub) statusUnsub();
+  statusUnsub = onSnapshot(doc(db,'users',uid), s => {
+    const d=s.data(); const t=d?.lastActive?.toDate(); const on = t && (Date.now()-t<300000);
+    document.getElementById('t-status').innerHTML = on ? '<span class="online-dot"></span>Active now' : `Last seen ${timeAgo(d?.lastActive)}`;
+  });
+  if (typeUnsub) typeUnsub();
+  typeUnsub = onSnapshot(doc(db,'typing',`${uid}_${me.uid}`), s=>{
+    const t=s.data(); const msgs=document.getElementById('msgs'); const ex=document.getElementById('typing-ind');
+    if (t?.typing && Date.now()-t.ts<5000){ if(!ex){ const d=document.createElement('div'); d.id='typing-ind'; d.className='typing-dots'; d.innerHTML='<span></span><span></span><span></span>'; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight; } }
+    else if (ex) ex.remove();
+  });
+  renderThread();
+  renderList();
+};
+window.closeThread = () => { document.getElementById('app').classList.remove('open'); active=null; document.getElementById('no-thread').style.display='flex'; document.getElementById('thread').style.display='none'; };
+
+function renderThread(){
+  const msgs = document.getElementById('msgs'); msgs.innerHTML='';
+  const b = writeBatch(db); let any=false;
+  const list = allMsgs.filter(m => (m.sender===me.uid&&m.receiver===active)||(m.sender===active&&m.receiver===me.uid))
+                     .sort((a,b)=>(a.timestamp?.toMillis?.()||0)-(b.timestamp?.toMillis?.()||0));
+  list.forEach(m => {
+    const mine = m.sender===me.uid;
+    let media='';
+    if (m.mediaUrl){
+      if (m.mediaType==='video') media = `<video src="${m.mediaUrl}" controls></video>`;
+      else if (m.mediaType==='voice') media = `<div class="voice"><i class="fas fa-play" onclick="playVoice(this,'${m.mediaUrl}')"></i><div class="wave"><i></i></div><small>Voice</small></div>`;
+      else media = `<img src="${m.mediaUrl}" onclick="window.open('${m.mediaUrl}','_blank')">`;
+    }
+    const ts = m.seen && mine ? '✓✓' : (mine?'✓':'');
+    const react = m.reaction ? `<div class="react-pill">${m.reaction}</div>` : '';
+    msgs.innerHTML += `<div class="bubble ${mine?'sent':'recv'}" oncontextmenu="event.preventDefault();msgMenu('${m.id}',${mine})" ondblclick="msgMenu('${m.id}',${mine})">${m.text?esc(m.text):''}${media}<span class="ts">${timeAgo(m.timestamp)} ${ts}</span>${react}</div>`;
+    if (!mine && !m.seen){ b.update(doc(db,'messages',m.id),{seen:true}); any=true; }
+  });
+  if (any) b.commit();
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+window.playVoice = (el, url) => {
+  if (!el._a){ el._a = new Audio(url); el._a.onended = ()=>el.className='fas fa-play'; }
+  if (el._a.paused){ el._a.play(); el.className='fas fa-pause'; } else { el._a.pause(); el.className='fas fa-play'; }
+};
+
+window.send = async () => {
+  const i=document.getElementById('text'); const t=i.value.trim();
+  if(!t||!active)return; i.value='';
+  await addDoc(collection(db,'messages'),{sender:me.uid,receiver:active,text:t,seen:false,timestamp:serverTimestamp()});
+};
+window.onType = async () => {
+  if(!active) return;
+  if (typeTimer) clearTimeout(typeTimer);
+  await setDoc(doc(db,'typing',`${me.uid}_${active}`),{typing:true,ts:Date.now()});
+  typeTimer = setTimeout(()=>setDoc(doc(db,'typing',`${me.uid}_${active}`),{typing:false,ts:Date.now()}), 1400);
+};
+window.sendMedia = async input => {
+  if(!input.files[0]||!active)return;
+  const f=input.files[0]; const tp=f.type.startsWith('video')?'video':'image';
+  Swal.fire({title:'Uploading...',didOpen:()=>Swal.showLoading(),background:'#121212',color:'#fff',toast:true,position:'top'});
+  try{
+    const url = await uploadCloud(f);
+    await addDoc(collection(db,'messages'),{sender:me.uid,receiver:active,mediaUrl:url,mediaType:tp,seen:false,timestamp:serverTimestamp()});
+    Swal.close();
+  } catch { Swal.fire({icon:'error',title:'Failed',background:'#121212',color:'#fff'}); }
+  input.value='';
+};
+
+let rec=null, chunks=[];
+window.startRec = async () => {
+  if(!active) return;
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({audio:true});
+    rec = new MediaRecorder(s); chunks=[];
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = async () => {
+      const b = new Blob(chunks,{type:'audio/webm'}); const f = new File([b],'voice.webm',{type:'audio/webm'});
+      try { const url = await uploadCloud(f); await addDoc(collection(db,'messages'),{sender:me.uid,receiver:active,mediaUrl:url,mediaType:'voice',seen:false,timestamp:serverTimestamp()}); } catch{}
+      s.getTracks().forEach(t=>t.stop());
+    };
+    rec.start();
+    document.getElementById('mic').style.color='red';
+    recStarted = Date.now(); document.getElementById('rec-timer').style.display='block';
+    recTimer = setInterval(()=>{ const s=Math.floor((Date.now()-recStarted)/1000); document.getElementById('rec-time').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); },250);
+  } catch { Swal.fire({title:'Mic permission denied',toast:true,position:'top',timer:1500,showConfirmButton:false,background:'#121212',color:'#fff'}); }
+};
+window.stopRec = () => { if(rec&&rec.state==='recording'){ rec.stop(); document.getElementById('mic').style.color='var(--primary)'; clearInterval(recTimer); document.getElementById('rec-timer').style.display='none'; document.getElementById('rec-time').textContent='00:00'; } };
+
+async function uploadCloud(file){
+  const fd=new FormData(); fd.append('file',file); fd.append('upload_preset','Meetwoyou');
+  const r = await fetch('https://api.cloudinary.com/v1_1/dpgawb5sl/auto/upload',{method:'POST',body:fd});
+  const j = await r.json(); if(!j.secure_url) throw new Error('upload failed'); return j.secure_url;
+}
+window.uploadCloud = uploadCloud;
+
+window.msgMenu = async (mid, mine) => {
+  const m = allMsgs.find(x=>x.id===mid);
+  if (window.MWModernMessageMenu) return window.MWModernMessageMenu(mid, mine, m?.text||'');
+  const reactions = ['❤️','😂','😮','😢','👍','🔥'];
+  const opts = ['React', mine?'Edit':null, 'Delete', 'Cancel'].filter(Boolean);
+  const { value } = await Swal.fire({title:'Message',input:'radio',inputOptions:opts.reduce((a,c)=>({...a,[c]:c}),{}),background:'#121212',color:'#fff'});
+  if (value==='React'){
+    const { value: r } = await Swal.fire({title:'Pick reaction',input:'radio',inputOptions:reactions.reduce((a,c)=>({...a,[c]:c}),{}),background:'#121212',color:'#fff'});
+    if (r) await updateDoc(doc(db,'messages',mid),{reaction:r});
+  } else if (value==='Edit' && mine){
+    const m = allMsgs.find(x=>x.id===mid);
+    const { value: nt } = await Swal.fire({input:'text',inputValue:m?.text||'',background:'#121212',color:'#fff'});
+    if (nt) await updateDoc(doc(db,'messages',mid),{text:nt+' (edited)'});
+  } else if (value==='Delete'){
+    await deleteDoc(doc(db,'messages',mid));
+  }
+};
+
+window.newChat = async () => {
+  const opts = {}; allUsers.filter(u=>u.id!==me.uid).slice(0,50).forEach(u=>opts[u.id]=u.displayName||u.id);
+  const { value: uid } = await Swal.fire({title:'Start chat with',input:'select',inputOptions:opts,background:'#121212',color:'#fff'});
+  if (uid) openChat(uid);
+};
+window.threadInfo = async () => {
+  const r = await Swal.fire({title:'Conversation',html:'<p style="color:#888">Tap a message twice or right-click to react, edit, or delete.</p>',background:'#121212',color:'#fff',showCancelButton:true,confirmButtonText:'Close',cancelButtonText:'Delete all'});
+  if (r.dismiss==='cancel'){
+    const list = allMsgs.filter(m => (m.sender===me.uid&&m.receiver===active)||(m.sender===active&&m.receiver===me.uid));
+    const b=writeBatch(db); list.forEach(m=>b.delete(doc(db,'messages',m.id))); await b.commit();
+  }
+};
+
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+<script type="module" src="./mw-upgrades.js"></script>
+<script type="module" src="./mw-final.js"></script>
+</body>
+</html>

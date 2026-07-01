@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meetwoyou | Ultra Admin</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+<link rel="shortcut icon" href="./favicon.ico">
+<link rel="manifest" href="./admin-manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+
+<style>
+:root{--primary:#8b5cf6;--primary-hover:#7c3aed;--bg:#0f172a;--card:#1e293b;--text-main:#f8fafc;--text-dim:#94a3b8;--danger:#ef4444;--success:#22c55e;--warning:#f59e0b;--info:#0ea5e9}
+*{box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text-main);margin:0;display:flex;min-height:100vh}
+.sidebar{width:260px;background:#020617;border-right:1px solid rgba(255,255,255,.05);padding:20px;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:100}
+.logo{font-size:22px;font-weight:800;color:var(--primary);margin-bottom:30px;display:flex;align-items:center;gap:10px}
+.logo img{width:36px;height:36px;border-radius:10px}
+.nav-link{padding:12px 14px;border-radius:10px;color:var(--text-dim);text-decoration:none;display:flex;align-items:center;gap:12px;margin-bottom:6px;cursor:pointer;transition:.2s;font-size:14px}
+.nav-link:hover,.nav-link.active{background:rgba(139,92,246,.1);color:var(--primary)}
+.nav-link.active{background:var(--primary);color:#fff}
+.nav-link .badge{margin-left:auto;background:var(--danger);font-size:10px;padding:2px 6px;border-radius:10px;display:none}
+.main-content{margin-left:260px;flex:1;padding:24px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);padding:18px;border-radius:14px;border:1px solid rgba(255,255,255,.05);position:relative;overflow:hidden}
+.stat-card::after{content:"";position:absolute;top:-30px;right:-30px;width:80px;height:80px;border-radius:50%;background:var(--primary);opacity:.08}
+.stat-card span{color:var(--text-dim);font-size:13px}
+.stat-card h2{margin:6px 0 0;font-size:26px;font-weight:800}
+.stat-card .delta{font-size:11px;margin-top:6px;color:var(--success)}
+.toolbar{background:var(--card);padding:14px;border-radius:12px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.search-box{background:var(--bg);border:1px solid #334155;padding:9px 14px;border-radius:8px;color:#fff;min-width:240px;flex:1}
+.filter-select{background:var(--bg);color:#fff;border:1px solid #334155;padding:9px;border-radius:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.card{background:var(--card);border-radius:14px;padding:18px;position:relative;border:1px solid rgba(255,255,255,.05);transition:.2s}
+.card:hover{transform:translateY(-3px);border-color:rgba(139,92,246,.3)}
+.user-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.user-top img{width:48px;height:48px;border-radius:12px;object-fit:cover;border:2px solid var(--primary)}
+.badge-v{color:#0095f6}
+.banned-badge{background:var(--danger);font-size:10px;padding:2px 6px;border-radius:4px;margin-left:5px}
+.action-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.btn{border:none;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;transition:.2s;font-family:inherit}
+.btn:hover{filter:brightness(1.1)}
+.btn-v{background:var(--info);color:#fff}
+.btn-ban{background:var(--warning);color:#000}
+.btn-del{background:var(--danger);color:#fff}
+.btn-boost{background:var(--success);color:#fff}
+.btn-primary{background:var(--primary);color:#fff}
+.input-group{margin-top:12px;background:rgba(0,0,0,.3);padding:10px;border-radius:10px}
+.input-group label{font-size:11px;color:var(--text-dim);display:block;margin-bottom:5px}
+.input-row{display:flex;gap:5px;align-items:center}
+input[type="number"],input[type="text"],textarea{background:var(--bg);border:1px solid #334155;color:#fff;padding:7px;width:100%;border-radius:6px;font-family:inherit}
+.media-preview{width:100%;max-height:220px;object-fit:cover;border-radius:12px;margin-top:10px;border:1px solid #334155}
+.report-card{border-left:4px solid var(--danger)}
+.report-meta{font-size:12px;color:var(--text-dim);margin-top:4px}
+.bulk-bar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--primary);padding:13px 26px;border-radius:50px;display:none;align-items:center;gap:16px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:1000}
+.select-check{position:absolute;top:14px;right:14px;transform:scale(1.3);cursor:pointer}
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;justify-content:center;align-items:center;z-index:9999}
+.spinner{width:50px;height:50px;border:5px solid #334155;border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+[hidden]{display:none!important}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.chart-card{background:var(--card);border-radius:14px;padding:18px;border:1px solid rgba(255,255,255,.05);min-height:280px}
+.chart-card h3{margin:0 0 10px;font-size:14px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+@media (max-width:880px){.sidebar{width:64px;padding:14px 8px}.sidebar .lbl,.logo span{display:none}.main-content{margin-left:64px;padding:14px}.charts-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="spinner"></div></div>
+
+<aside class="sidebar">
+  <div class="logo"><img src="./web-app-manifest-192x192.png" alt=""><span>Meetwoyou</span></div>
+  <nav>
+    <div class="nav-link active" data-tab="analytics"><i class="fas fa-chart-pie"></i><span class="lbl">Analytics</span></div>
+    <div class="nav-link" data-tab="users"><i class="fas fa-users"></i><span class="lbl">User Management</span></div>
+    <div class="nav-link" data-tab="posts"><i class="fas fa-stream"></i><span class="lbl">Post Control</span></div>
+    <div class="nav-link" data-tab="reports"><i class="fas fa-flag"></i><span class="lbl">Reports</span><span class="badge" id="report-badge">0</span></div>
+    <div class="nav-link" data-tab="broadcast"><i class="fas fa-bullhorn"></i><span class="lbl">Broadcast</span></div>
+    <div class="nav-link" data-tab="bugs"><i class="fas fa-bug"></i><span class="lbl">Bug Reports</span></div>
+    <div class="nav-link" data-tab="logs"><i class="fas fa-history"></i><span class="lbl">Activity Logs</span></div>
+    <div class="nav-link" data-tab="monet"><i class="fas fa-sack-dollar"></i><span class="lbl">Monetization</span></div>
+    <div class="nav-link" data-tab="flags"><i class="fas fa-toggle-on"></i><span class="lbl">Feature Flags</span></div>
+    <div class="nav-link" data-tab="moderation"><i class="fas fa-gavel"></i><span class="lbl">Moderation Queue</span></div>
+    <div class="nav-link" data-tab="settings"><i class="fas fa-sliders"></i><span class="lbl">App Settings</span></div>
+
+  </nav>
+  <div style="margin-top:auto">
+    <button class="btn btn-del" style="width:100%;justify-content:center" onclick="location.href='index.html'"><i class="fas fa-sign-out-alt"></i> <span class="lbl">Exit Admin</span></button>
+  </div>
+</aside>
+
+<main class="main-content">
+  <div class="header">
+    <h2 id="tab-title">Analytics Overview</h2>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button id="mw-install-admin" class="mw-install-chip" onclick="MWInstall('Admin')"><i class="fas fa-download"></i><span>Install Admin</span></button><div id="auth-status" style="font-size:13px;color:var(--text-dim)">Checking Admin...</div></div>
+  </div>
+
+  <!-- Analytics -->
+  <section id="analytics-section" class="tab-content">
+    <div class="stats-grid">
+      <div class="stat-card"><span>Total Users</span><h2 id="stat-users">0</h2><div class="delta" id="d-users">—</div></div>
+      <div class="stat-card"><span>Total Posts</span><h2 id="stat-posts">0</h2><div class="delta" id="d-posts">—</div></div>
+      <div class="stat-card"><span>Active Now</span><h2 id="stat-active">0</h2><div class="delta">Last 5 min</div></div>
+      <div class="stat-card"><span>Verified</span><h2 id="stat-verified">0</h2></div>
+      <div class="stat-card"><span>Reports</span><h2 id="stat-reports">0</h2></div>
+      <div class="stat-card"><span>Stories (24h)</span><h2 id="stat-stories">0</h2></div>
+      <div class="stat-card"><span>Messages (24h)</span><h2 id="stat-msgs">0</h2></div>
+      <div class="stat-card"><span>Total Likes</span><h2 id="stat-likes">0</h2></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><h3>User Growth (last 14 days)</h3><canvas id="chart-growth"></canvas></div>
+      <div class="chart-card"><h3>Posts per Day</h3><canvas id="chart-posts"></canvas></div>
+      <div class="chart-card"><h3>Top Countries (viewers)</h3><canvas id="chart-country"></canvas></div>
+      <div class="chart-card"><h3>Engagement Split</h3><canvas id="chart-engage"></canvas></div>
+    </div>
+  </section>
+
+  <!-- Users -->
+  <section id="users-section" class="tab-content" hidden>
+    <div class="toolbar">
+      <input type="text" class="search-box" id="userSearch" placeholder="Search by name or email..." oninput="renderUsers()">
+      <select class="filter-select" id="userFilter" onchange="renderUsers()">
+        <option value="all">All Users</option>
+        <option value="verified">Verified Only</option>
+        <option value="unverified">Unverified Only</option>
+        <option value="banned">Banned Only</option>
+        <option value="high">Followers &gt; 1000</option>
+        <option value="active">Active Now</option>
+      </select>
+      <button class="btn btn-v" onclick="bulkVerify()">Bulk Verify</button>
+      <button class="btn btn-primary" onclick="exportUsersCSV()"><i class="fas fa-download"></i> CSV</button>
+    </div>
+    <div class="grid" id="user-list"></div>
+  </section>
+
+  <!-- Posts -->
+  <section id="posts-section" class="tab-content" hidden>
+    <div class="toolbar">
+      <input type="text" class="search-box" id="postSearch" placeholder="Search post content..." oninput="renderPosts()">
+      <span style="color:var(--text-dim)">Total: <span id="post-count">0</span></span>
+    </div>
+    <div class="grid" id="post-list"></div>
+  </section>
+
+  <!-- Reports -->
+  <section id="reports-section" class="tab-content" hidden>
+    <div class="grid" id="report-list"></div>
+  </section>
+
+  <!-- Broadcast -->
+  <section id="broadcast-section" class="tab-content" hidden>
+    <div class="card" style="max-width:600px">
+      <h3 style="margin-top:0">Send notification to all users</h3>
+      <textarea id="bc-text" rows="4" placeholder="Your announcement..."></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-primary" onclick="sendBroadcast()"><i class="fas fa-paper-plane"></i> Send to Everyone</button>
+        <button class="btn btn-v" onclick="sendBroadcast(true)"><i class="fas fa-check-circle"></i> Verified Only</button>
+      </div>
+      <p style="margin-top:14px;font-size:12px;color:var(--text-dim)">Broadcasts appear in every recipient's notification bell.</p>
+    </div>
+  </section>
+
+  <!-- Bugs -->
+  <section id="bugs-section" class="tab-content" hidden>
+    <div class="grid" id="bug-list"></div>
+  </section>
+
+  <!-- Logs -->
+  <section id="logs-section" class="tab-content" hidden>
+    <div class="card"><div id="logs-list" style="max-height:600px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:12px"></div></div>
+  </section>
+
+  <!-- Monetization admin -->
+  <section id="monet-section" class="tab-content" hidden>
+    <div class="stats-grid">
+      <div class="stat-card"><span>Eligible Creators</span><h2 id="mstat-elig">0</h2><div class="delta">≥ 5,000 followers</div></div>
+      <div class="stat-card"><span>Enrolled</span><h2 id="mstat-enroll">0</h2></div>
+      <div class="stat-card"><span>Revenue (30d)</span><h2>$0</h2></div>
+      <div class="stat-card"><span>Payouts pending</span><h2>$0</h2></div>
+    </div>
+    <div class="card"><h3 style="margin-top:0">Payout policy</h3>
+      <div class="input-group"><label>Minimum payout ($)</label><input type="number" id="mset-min" value="25"></div>
+      <div class="input-group"><label>Revenue share (%)</label><input type="number" id="mset-share" value="55"></div>
+      <div class="input-group"><label>Follower threshold to unlock</label><input type="number" id="mset-thr" value="5000"></div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="Swal.fire({title:'Saved',background:'#1e293b',color:'#fff',timer:900,showConfirmButton:false})">Save policy</button>
+    </div>
+  </section>
+
+  <!-- Feature flags -->
+  <section id="flags-section" class="tab-content" hidden>
+    <div class="card">
+      <h3 style="margin-top:0">Toggle features live</h3>
+      <div id="flag-list"></div>
+      <script>
+        (function(){
+          const flags=[['reels60','Reels ≤ 60s only',true],['stories','Stories',true],['live','Live Streams',false],['ai_captions','AI Captions',false],['monetization','Creator Monetization',true],['messenger_calls','Voice / Video Calls',true],['story_reactions','Story Reactions',true],['dark_only','Force Dark Theme',false]];
+          const box = document.getElementById('flag-list');
+          if(box) box.innerHTML = flags.map(([k,l,v])=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid rgba(255,255,255,.05)"><span>${l}</span><label class="switch"><input type="checkbox" ${v?'checked':''} onchange="localStorage.setItem('flag-${k}',this.checked?'1':'0')"></label></div>`).join('');
+        })();
+      </script>
+    </div>
+  </section>
+
+  <!-- Moderation queue -->
+  <section id="moderation-section" class="tab-content" hidden>
+    <div class="toolbar"><input type="text" class="search-box" placeholder="Search reports…"><select class="filter-select"><option>All types</option><option>Post</option><option>Comment</option><option>User</option><option>Message</option></select></div>
+    <div class="grid" id="moderation-list"><div class="card"><b>No pending items</b><div class="report-meta">Reports and flagged content will appear here in real time.</div></div></div>
+  </section>
+
+  <!-- App settings -->
+  <section id="settings-section" class="tab-content" hidden>
+    <div class="grid">
+      <div class="card"><h3 style="margin-top:0">Branding</h3>
+        <div class="input-group"><label>App name</label><input type="text" value="Meetwoyou"></div>
+        <div class="input-group"><label>Primary color</label><input type="text" value="#0095f6"></div>
+      </div>
+      <div class="card"><h3 style="margin-top:0">Uploads</h3>
+        <div class="input-group"><label>Max reel length (sec)</label><input type="number" value="60"></div>
+        <div class="input-group"><label>Max upload size (MB)</label><input type="number" value="200"></div>
+      </div>
+      <div class="card"><h3 style="margin-top:0">Moderation</h3>
+        <div class="input-group"><label>Blocked words</label><textarea rows="3"></textarea></div>
+        <div class="input-group"><label>Auto-hide reports at</label><input type="number" value="3"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="bulk-bar" id="bulk-bar">
+  <span id="bulk-count">0 Selected</span>
+  <button class="btn btn-v" onclick="execBulk('verify')">Verify</button>
+  <button class="btn btn-ban" onclick="execBulk('ban')">Ban</button>
+  <button class="btn btn-del" onclick="execBulk('delete')">Delete</button>
+  <button class="btn" style="background:#475569;color:#fff" onclick="clearSelection()">Cancel</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy, addDoc, serverTimestamp, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = { apiKey:"AIzaSyBn3x2qSo8k6a9wrxNfLmVliWMmsUk8wfY", authDomain:"meetwoyou-436a2.firebaseapp.com", projectId:"meetwoyou-436a2", storageBucket:"meetwoyou-436a2.firebasestorage.app", messagingSenderId:"612788132077", appId:"1:612788132077:web:0a8b92edf26778efd4d4e4" };
+const app=initializeApp(firebaseConfig), db=getFirestore(app), auth=getAuth(app); window.firebaseAuth=auth; window.firebaseDB=db;
+
+let masterUsers=[], masterPosts=[], masterReports=[], masterBugs=[], masterStories=[], masterMsgs=[];
+let selectedUsers=new Set();
+let charts={};
+
+onAuthStateChanged(auth, user => {
+  if (!user || user.email !== 'admin@meetwoyou.com'){
+    Swal.fire({icon:'error',title:'Access Denied',text:'Admin identity required.',background:'#1e293b',color:'#fff'});
+    setTimeout(()=>location.href='index.html', 2200);
+  } else {
+    window.currentUser = user; window.MWme = user;
+    document.getElementById('auth-status').innerText = `Admin: ${user.email}`;
+    document.getElementById('loader').style.display='none';
+    initApp();
+  }
+});
+
+function initApp(){
+  onSnapshot(collection(db,'users'), s => { masterUsers=s.docs.map(d=>({id:d.id,...d.data()})); renderUsers(); updateStats(); renderCharts(); });
+  onSnapshot(query(collection(db,'posts'),orderBy('timestamp','desc')), s => { masterPosts=s.docs.map(d=>({id:d.id,...d.data()})); renderPosts(); updateStats(); renderCharts(); });
+  onSnapshot(collection(db,'reports'), s => { masterReports=s.docs.map(d=>({id:d.id,...d.data()})); renderReports(); updateStats(); });
+  onSnapshot(collection(db,'bugs'), s => { masterBugs=s.docs.map(d=>({id:d.id,...d.data()})); renderBugs(); });
+  onSnapshot(collection(db,'stories'), s => { masterStories=s.docs.map(d=>d.data()); updateStats(); });
+  onSnapshot(collection(db,'messages'), s => { masterMsgs=s.docs.map(d=>d.data()); updateStats(); });
+  onSnapshot(query(collection(db,'logs'),orderBy('timestamp','desc')), s => {
+    document.getElementById('logs-list').innerHTML = s.docs.map(d=>{ const l=d.data(); return `<div style="padding:7px;border-bottom:1px solid #334155"><span style="color:var(--primary)">[${l.timestamp?.toDate().toLocaleString()||'...'}]</span> ${l.action} → <span style="color:var(--info)">${l.target}</span></div>`; }).join('');
+  });
+
+  // tab nav
+  document.querySelectorAll('.nav-link').forEach(n => n.onclick = () => showTab(n.dataset.tab, n));
+}
+
+// ===== Render =====
+window.renderUsers = () => {
+  const list = document.getElementById('user-list');
+  const term = document.getElementById('userSearch').value.toLowerCase();
+  const f = document.getElementById('userFilter').value;
+  let arr = masterUsers.filter(u => (u.displayName?.toLowerCase().includes(term) || u.email?.toLowerCase().includes(term) || u.id.toLowerCase().includes(term)));
+  if (f==='verified') arr = arr.filter(u=>u.isVerified);
+  if (f==='unverified') arr = arr.filter(u=>!u.isVerified);
+  if (f==='banned') arr = arr.filter(u=>u.banned);
+  if (f==='high') arr = arr.filter(u=>cnt(u.followers)>1000);
+  if (f==='active') arr = arr.filter(u=>{ const t=u.lastActive?.toDate(); return t && (Date.now()-t < 300000); });
+
+  list.innerHTML = arr.map(u => `
+    <div class="card">
+      <input type="checkbox" class="select-check" onchange="toggleSelect('${u.id}')" ${selectedUsers.has(u.id)?'checked':''}>
+      <div class="user-top">
+        <img src="${u.photoURL||'./web-app-manifest-192x192.png'}">
+        <div>
+          <div style="font-weight:700">${esc(u.displayName||'')} ${u.isVerified?'<i class="fas fa-check-circle badge-v"></i>':''} ${u.banned?'<span class="banned-badge">BANNED</span>':''}</div>
+          <div style="font-size:11px;color:var(--text-dim)">${esc(u.email||'')}</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:2px">${cnt(u.followers)} followers · ${cnt(u.following)} following</div>
+        </div>
+      </div>
+      <div class="action-btns">
+        <button class="btn btn-v" onclick="updateField('users','${u.id}',{isVerified:${!u.isVerified}})">${u.isVerified?'Unverify':'Verify'}</button>
+        <select onchange="updateField('users','${u.id}',{badgeTier:this.value})" style="background:#0f172a;color:#fff;border:1px solid #334155;border-radius:6px;padding:5px;font-size:11px">
+          <option value="blue" ${u.badgeTier==='blue'?'selected':''}>Blue</option>
+          <option value="gold" ${u.badgeTier==='gold'?'selected':''}>Gold</option>
+          <option value="silver" ${u.badgeTier==='silver'?'selected':''}>Silver</option>
+        </select>
+        <button class="btn btn-ban" onclick="updateField('users','${u.id}',{banned:${!u.banned}})">${u.banned?'Unban':'Ban'}</button>
+        <button class="btn btn-del" onclick="deleteItem('users','${u.id}')">Delete</button>
+        <button class="btn btn-primary" onclick="MWOpenActivity('${u.id}')"><i class="fas fa-location-crosshairs"></i> Track</button>
+        <button class="btn btn-primary" onclick="dmUser('${u.id}','${esc(u.displayName||'')}')"><i class="fas fa-envelope"></i></button>
+      </div>
+      <div class="input-group">
+        <label>Boost Followers</label>
+        <div class="input-row">
+          <input type="number" id="f-${u.id}" value="${cnt(u.followers)}">
+          <button class="btn btn-boost" onclick="setBoost('users','${u.id}','followers','f-${u.id}')">Set</button>
+          <button class="btn btn-boost" style="background:#a855f7" onclick="autoBoost('users','${u.id}','followers','f-${u.id}')"><i class="fas fa-bolt"></i></button>
+        </div>
+      </div>
+    </div>`).join('');
+};
+
+window.renderPosts = () => {
+  const list=document.getElementById('post-list');
+  const term=document.getElementById('postSearch').value.toLowerCase();
+  let arr = masterPosts.filter(p => p.text?.toLowerCase().includes(term) || p.authorName?.toLowerCase().includes(term) || p.id.toLowerCase().includes(term));
+  document.getElementById('post-count').innerText = arr.length;
+  list.innerHTML = arr.map(p => `
+    <div class="card">
+      <div style="font-size:13px;margin-bottom:8px"><b>${esc(p.authorName||'')}</b> <span style="color:var(--text-dim)">· ${p.timestamp?.toDate().toLocaleDateString()||''}</span></div>
+      <div style="background:var(--bg);padding:10px;border-radius:8px;font-size:13px;max-height:90px;overflow:hidden">${esc(p.text||'<i>No text</i>')}</div>
+      ${p.img?`<img src="${p.img}" class="media-preview" loading="lazy">`:''}
+      ${p.video?`<video src="${p.video}" class="media-preview" controls preload="none"></video>`:''}
+      <div style="display:flex;gap:10px;margin-top:10px;font-size:12px;color:var(--text-dim)">
+        <span><i class="fas fa-heart"></i> ${cnt(p.likes)}</span>
+        <span><i class="far fa-eye"></i> ${cnt(p.viewCount||0)}</span>
+        <span><i class="far fa-comment"></i> ${(p.comments||[]).length}</span>
+      </div>
+      <div class="input-group">
+        <label><i class="fas fa-heart"></i> Set Likes</label>
+        <div class="input-row"><input type="number" id="l-${p.id}" value="${cnt(p.likes)}"><button class="btn btn-boost" onclick="setBoost('posts','${p.id}','likes','l-${p.id}')">Set</button></div>
+        <label style="margin-top:8px"><i class="fas fa-eye"></i> Set Views</label>
+        <div class="input-row"><input type="number" id="v-${p.id}" value="${cnt(p.viewCount||0)}"><button class="btn btn-boost" onclick="setViewCount('${p.id}','v-${p.id}')">Set</button></div>
+      </div>
+      <button class="btn btn-del" style="width:100%;margin-top:10px;justify-content:center" onclick="deleteItem('posts','${p.id}')">Delete Post</button>
+    </div>`).join('');
+};
+
+window.renderReports = () => {
+  const l = document.getElementById('report-list');
+  if (!masterReports.length){ l.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--text-dim)"><i class="fas fa-check-circle" style="font-size:50px;color:var(--success)"></i><p>No pending reports.</p></div>`; return; }
+  l.innerHTML = masterReports.map(r => `
+    <div class="card report-card">
+      <div style="font-weight:700;color:var(--danger)">Reason: ${esc(r.reason)}</div>
+      <div class="report-meta">Reported by: ${esc(r.reportedBy||'Unknown')}</div>
+      <div class="report-meta">Post ID: ${esc(r.postId)}</div>
+      <div class="action-btns">
+        <button class="btn btn-v" onclick="jumpToPost('${r.postId}')">View Post</button>
+        <button class="btn btn-del" onclick="deleteItem('reports','${r.id}')">Dismiss</button>
+        <button class="btn btn-ban" onclick="deleteItem('posts','${r.postId}');deleteItem('reports','${r.id}')">Delete Post</button>
+      </div>
+    </div>`).join('');
+};
+
+window.renderBugs = () => {
+  const l = document.getElementById('bug-list');
+  if (!masterBugs.length){ l.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--text-dim)">No bug reports.</div>`; return; }
+  l.innerHTML = masterBugs.map(b=>`<div class="card"><b>From: ${esc(b.uid)}</b><p>${esc(b.text||'')}</p><button class="btn btn-del" onclick="deleteItem('bugs','${b.id}')">Dismiss</button></div>`).join('');
+};
+
+// ===== Stats + Charts =====
+function updateStats(){
+  document.getElementById('stat-users').innerText = masterUsers.length;
+  document.getElementById('stat-posts').innerText = masterPosts.length;
+  document.getElementById('stat-reports').innerText = masterReports.length;
+  document.getElementById('stat-verified').innerText = masterUsers.filter(u=>u.isVerified).length;
+  document.getElementById('stat-stories').innerText = masterStories.length;
+  const now = Date.now();
+  document.getElementById('stat-active').innerText = masterUsers.filter(u=>{const t=u.lastActive?.toDate(); return t && (now-t<300000);}).length;
+  document.getElementById('stat-msgs').innerText = masterMsgs.filter(m=>{const t=m.timestamp?.toDate?.(); return t && (now-t<86400000);}).length;
+  document.getElementById('stat-likes').innerText = masterPosts.reduce((a,p)=>a+(p.likes?.length||0),0);
+  const rb = document.getElementById('report-badge'); if (masterReports.length){ rb.innerText=masterReports.length; rb.style.display='inline-block'; } else rb.style.display='none';
+}
+
+function bucketByDay(items, dateFn, days=14){
+  const labels=[], data=[];
+  for(let i=days-1;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); d.setHours(0,0,0,0); labels.push(d.toLocaleDateString(undefined,{month:'short',day:'numeric'})); data.push(0); }
+  const today = new Date(); today.setHours(0,0,0,0);
+  items.forEach(x=>{ const t=dateFn(x); if(!t)return; const diff=Math.floor((today-t)/86400000); const idx=days-1-diff; if(idx>=0 && idx<days) data[idx]++; });
+  return {labels,data};
+}
+
+function renderCharts(){
+  if (!window.Chart) { setTimeout(renderCharts, 400); return; }
+  const ug = bucketByDay(masterUsers, u=>{const t=u.timestamp?.toDate?.(); if(!t)return null; const d=new Date(t); d.setHours(0,0,0,0); return d;});
+  const pg = bucketByDay(masterPosts, p=>{const t=p.timestamp?.toDate?.(); if(!t)return null; const d=new Date(t); d.setHours(0,0,0,0); return d;});
+
+  const mkLine = (id, label, lbls, data, color) => {
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart(document.getElementById(id), { type:'line', data:{labels:lbls,datasets:[{label,data,borderColor:color,backgroundColor:color+'30',fill:true,tension:.35,borderWidth:2}]}, options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'},beginAtZero:true}}} });
+  };
+  mkLine('chart-growth','Users', ug.labels, ug.data, '#8b5cf6');
+  mkLine('chart-posts','Posts', pg.labels, pg.data, '#0ea5e9');
+
+  // Country chart from posts viewers — fallback to user country if available
+  const counts={};
+  masterUsers.forEach(u=>{ const c=u.country||'Unknown'; counts[c]=(counts[c]||0)+1; });
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  if (charts['chart-country']) charts['chart-country'].destroy();
+  charts['chart-country'] = new Chart(document.getElementById('chart-country'), { type:'bar', data:{labels:top.map(x=>x[0]),datasets:[{label:'Users',data:top.map(x=>x[1]),backgroundColor:'#22c55e'}]}, options:{plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}}} });
+
+  const likes = masterPosts.reduce((a,p)=>a+(p.likes?.length||0),0);
+  const comments = masterPosts.reduce((a,p)=>a+(p.comments?.length||0),0);
+  const views = masterPosts.reduce((a,p)=>a+(p.viewCount||0),0);
+  if (charts['chart-engage']) charts['chart-engage'].destroy();
+  charts['chart-engage'] = new Chart(document.getElementById('chart-engage'), { type:'doughnut', data:{labels:['Likes','Comments','Views'], datasets:[{data:[likes,comments,views], backgroundColor:['#ef4444','#0ea5e9','#f59e0b']}]}, options:{plugins:{legend:{position:'bottom',labels:{color:'#fff'}}}} });
+}
+
+// ===== Actions =====
+const cnt = f => !f?0:(Array.isArray(f)?f.length:f);
+const esc = s => (s||'').toString().replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+window.updateField = async (col,id,data) => { try { await updateDoc(doc(db,col,id),data); log(`Updated ${Object.keys(data).join(',')}`,id); } catch(e){ console.error(e); } };
+window.setBoost = async (col,id,field,inp) => { const v=parseInt(document.getElementById(inp).value); if(isNaN(v))return; const p={}; p[field] = v<50000 ? new Array(v).fill('boost_system') : v; await updateDoc(doc(db,col,id),p); log(`Boosted ${field} to ${v}`,id); Swal.fire({toast:true,position:'top-end',icon:'success',title:'Updated',timer:1500,showConfirmButton:false}); };
+window.setViewCount = async (id,inp) => { const v=parseInt(document.getElementById(inp).value); if(isNaN(v))return; await updateDoc(doc(db,'posts',id),{viewCount:v}); log(`Set views ${v}`,id); Swal.fire({toast:true,position:'top-end',icon:'success',title:'Views set',timer:1500,showConfirmButton:false}); };
+window.autoBoost = (col,id,field,inp) => { const c=parseInt(document.getElementById(inp).value)||0; document.getElementById(inp).value = c + Math.floor(Math.random()*100)+50; setBoost(col,id,field,inp); };
+window.deleteItem = async (col,id) => { const r=await Swal.fire({title:'Are you sure?',text:'Cannot be undone.',icon:'warning',showCancelButton:true,confirmButtonColor:'#ef4444',background:'#1e293b',color:'#fff'}); if(r.isConfirmed){ await deleteDoc(doc(db,col,id)); log(`Deleted from ${col}`,id); } };
+async function log(action,target){ try{ await addDoc(collection(db,'logs'),{action,target,timestamp:serverTimestamp()}); }catch{} }
+
+window.dmUser = async (uid,name) => { const{value:t}=await Swal.fire({title:`Notify ${name}`,input:'textarea',background:'#1e293b',color:'#fff',showCancelButton:true}); if(t){ await addDoc(collection(db,'notifications'),{userId:uid,type:'system',message:t,read:false,timestamp:serverTimestamp()}); Swal.fire({toast:true,position:'top-end',icon:'success',title:'Sent',timer:1500,showConfirmButton:false}); } };
+
+window.sendBroadcast = async (verifiedOnly=false) => {
+  const t = document.getElementById('bc-text').value.trim(); if(!t) return;
+  const targets = masterUsers.filter(u => !verifiedOnly || u.isVerified);
+  const r = await Swal.fire({title:`Send to ${targets.length} users?`,icon:'question',showCancelButton:true,background:'#1e293b',color:'#fff'});
+  if (!r.isConfirmed) return;
+  let batch=writeBatch(db), n=0;
+  for (const u of targets){
+    batch.set(doc(collection(db,'notifications')), {userId:u.id,type:'system',message:t,read:false,timestamp:serverTimestamp()});
+    n++; if (n%400===0){ await batch.commit(); batch=writeBatch(db); }
+  }
+  await batch.commit();
+  if (!verifiedOnly && window.MWSendOfficialBroadcast) await window.MWSendOfficialBroadcast(t);
+  document.getElementById('bc-text').value=''; log('Broadcast sent', `${targets.length} users`);
+  Swal.fire({icon:'success',title:`Sent to ${targets.length}`,background:'#1e293b',color:'#fff'});
+};
+
+window.exportUsersCSV = () => {
+  const rows = [['id','displayName','email','followers','following','isVerified','banned']];
+  masterUsers.forEach(u=>rows.push([u.id,u.displayName||'',u.email||'',cnt(u.followers),cnt(u.following),u.isVerified?'1':'0',u.banned?'1':'0']));
+  const csv = rows.map(r=>r.map(x=>`"${(x+'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='users.csv'; a.click();
+};
+
+// Bulk
+window.toggleSelect = id => { selectedUsers.has(id)?selectedUsers.delete(id):selectedUsers.add(id); const b=document.getElementById('bulk-bar'); if(selectedUsers.size){ b.style.display='flex'; document.getElementById('bulk-count').innerText=`${selectedUsers.size} Selected`; } else b.style.display='none'; };
+window.clearSelection = () => { selectedUsers.clear(); document.querySelectorAll('.select-check').forEach(c=>c.checked=false); document.getElementById('bulk-bar').style.display='none'; };
+window.bulkVerify = () => { masterUsers.forEach(u=>{ if(!u.isVerified) selectedUsers.add(u.id); }); execBulk('verify'); };
+window.execBulk = async (action) => {
+  const batch=writeBatch(db), ids=Array.from(selectedUsers);
+  for (const id of ids){ const r=doc(db,'users',id);
+    if (action==='verify') batch.update(r,{isVerified:true});
+    if (action==='ban') batch.update(r,{banned:true});
+    if (action==='delete') batch.delete(r);
+  }
+  await batch.commit(); log(`Bulk ${action}`,`${ids.length} users`); clearSelection();
+  Swal.fire({icon:'success',title:`Bulk ${action} complete`,background:'#1e293b',color:'#fff'});
+};
+
+window.showTab = (tab, btn) => {
+  document.querySelectorAll('.tab-content').forEach(s=>s.hidden=true);
+  document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
+  document.getElementById(`${tab}-section`).hidden=false;
+  if (btn) btn.classList.add('active');
+  document.getElementById('tab-title').innerText = btn?.querySelector('.lbl')?.innerText || tab.charAt(0).toUpperCase()+tab.slice(1);
+  if (tab==='analytics') setTimeout(renderCharts, 50);
+};
+window.jumpToPost = pid => { showTab('posts', document.querySelector('[data-tab="posts"]')); document.getElementById('postSearch').value=pid; renderPosts(); };
+</script>
+<script type="module" src="./mw-upgrades.js"></script>
+<script type="module" src="./mw-final.js"></script>
+</body>
+</html>

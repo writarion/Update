@@ -1,0 +1,88 @@
+/* ================= Meetwoyou Enhancements ================= */
+
+/* Top search bar in home feed */
+.mw-top-search{display:flex;align-items:center;gap:10px;margin:10px 12px 4px;background:#141414;border:1px solid #222;border-radius:14px;padding:9px 14px}
+.mw-top-search i{color:#8e8e8e;font-size:14px}
+.mw-top-search input{flex:1;background:transparent;border:none;color:#fff;outline:none;font-size:14px;padding:2px 0}
+
+/* Hide online presence dot inside the home feed (keep in messenger) */
+#home-sec .online-dot{display:none !important}
+
+/* Prettier verified badge — Instagram-style clean checkmark */
+.mw-vbadge{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-left:5px;vertical-align:-3px;background:linear-gradient(135deg,#1d9bf0,#0095f6);border-radius:50%;box-shadow:0 1px 3px rgba(0,149,246,.45)}
+.mw-vbadge svg{width:10px;height:10px;fill:#fff}
+.mw-vbadge.badge-gold{background:linear-gradient(135deg,#ffd75e,#f59e0b);box-shadow:0 1px 3px rgba(245,158,11,.5)}
+.mw-vbadge.badge-diamond{background:linear-gradient(135deg,#c4b5fd,#8b5cf6);box-shadow:0 1px 3px rgba(139,92,246,.5)}
+
+/* Bottom-sheet user action menu */
+.mw-sheet-mask{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:9998;opacity:0;transition:opacity .2s}
+.mw-sheet-mask.open{opacity:1}
+.mw-sheet{position:fixed;left:0;right:0;bottom:0;background:#121212;border-top-left-radius:24px;border-top-right-radius:24px;padding:8px 0 max(18px,env(safe-area-inset-bottom));z-index:9999;transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.9,.3,1);max-height:80vh;overflow-y:auto}
+.mw-sheet.open{transform:translateY(0)}
+.mw-sheet .grab{width:42px;height:4px;background:#333;border-radius:4px;margin:8px auto 12px}
+.mw-sheet-user{display:flex;align-items:center;gap:12px;padding:6px 20px 14px;border-bottom:1px solid #1e1e1e}
+.mw-sheet-user img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.mw-sheet-item{display:flex;align-items:center;gap:14px;padding:14px 20px;color:#fff;font-size:15px;cursor:pointer;transition:background .15s}
+.mw-sheet-item:hover{background:#1a1a1a}
+.mw-sheet-item i{width:22px;color:#8e8e8e;font-size:16px;text-align:center}
+.mw-sheet-item.danger{color:#ef4444}
+.mw-sheet-item.danger i{color:#ef4444}
+.mw-sheet-item small{display:block;color:#8e8e8e;font-size:11px;margin-top:2px}
+.mw-sheet-item .lbl-wrap{flex:1}
+
+/* Pretty notifications */
+#notif-list .mw-notif{display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid #1a1a1a;align-items:center;cursor:pointer;transition:background .15s}
+#notif-list .mw-notif:hover{background:#141414}
+#notif-list .mw-notif.unread{background:linear-gradient(90deg,rgba(0,149,246,.08),transparent)}
+#notif-list .mw-notif .av{position:relative;flex-shrink:0}
+#notif-list .mw-notif .av img{width:46px;height:46px;border-radius:50%;object-fit:cover}
+#notif-list .mw-notif .av .tag{position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;border:2px solid #000}
+#notif-list .mw-notif .body{flex:1;min-width:0}
+#notif-list .mw-notif .body b{font-size:14px}
+#notif-list .mw-notif .body .msg{color:#d4d4d4;font-size:13px;line-height:1.35;margin-top:2px}
+#notif-list .mw-notif .body .t{color:#8e8e8e;font-size:11px;margin-top:4px}
+#notif-list .mw-notif .thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.tag-like{background:#ef4444}.tag-comment{background:#0095f6}.tag-follow{background:#7c3aed}.tag-msg{background:#10b981}.tag-mention{background:#f59e0b}.tag-system{background:#64748b}
+
+/* Extended profile edit form */
+.mw-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.mw-edit-grid input,.mw-edit-grid select{margin:0}
+.mw-edit-section{margin-top:14px;padding-top:10px;border-top:1px solid #262626}
+.mw-edit-section h5{margin:0 0 8px;color:#8e8e8e;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+
+/* Beautified profile display */
+#profile-sec #p-name,#user-profile-content h3{background:linear-gradient(90deg,#fff 30%,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;letter-spacing:.2px}
+.profile-details{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 12px}
+.profile-details>div{background:#161616;border:1px solid #222;padding:6px 10px;border-radius:14px;font-size:12px;color:#d4d4d4;display:inline-flex;align-items:center;gap:6px}
+.profile-details i{color:#a78bfa}
+.mw-social-row{display:flex;justify-content:center;gap:14px;margin:8px 0}
+.mw-social-row a{color:#a78bfa;font-size:20px}
+
+/* Monetization card */
+.mw-monet-card{margin:16px 12px;padding:16px;border-radius:16px;background:linear-gradient(135deg,#7c3aed,#0095f6);color:#fff;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(124,58,237,.35)}
+.mw-monet-card::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+.mw-monet-card h4{margin:0 0 4px;font-size:18px}
+.mw-monet-card p{margin:0;font-size:13px;opacity:.9}
+.mw-monet-card button{margin-top:12px;background:#fff;color:#7c3aed;border:none;padding:8px 16px;border-radius:20px;font-weight:800;font-size:13px;cursor:pointer}
+.mw-monet-locked{background:#1a1a1a !important;color:#8e8e8e !important;box-shadow:none !important}
+.mw-monet-locked button{background:#262626 !important;color:#8e8e8e !important;cursor:not-allowed}
+.mw-monet-locked::after{display:none}
+
+/* Monetization dashboard */
+.mw-monet-panel{position:fixed;inset:0;background:#0a0a0a;z-index:9997;overflow-y:auto;display:none}
+.mw-monet-panel.open{display:block}
+.mw-monet-head{display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #1e1e1e;position:sticky;top:0;background:#0a0a0a;z-index:2}
+.mw-monet-head b{font-size:16px}
+.mw-monet-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
+.mw-monet-stat{background:linear-gradient(135deg,#161616,#0f0f0f);border:1px solid #222;padding:14px;border-radius:14px}
+.mw-monet-stat small{color:#8e8e8e;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.mw-monet-stat h3{margin:6px 0 0;font-size:22px;background:linear-gradient(90deg,#4ade80,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mw-monet-section{padding:14px}
+.mw-monet-section h4{margin:0 0 10px;font-size:13px;color:#8e8e8e;text-transform:uppercase;letter-spacing:1px}
+.mw-monet-row{display:flex;align-items:center;justify-content:space-between;padding:14px;background:#141414;border:1px solid #1f1f1f;border-radius:12px;margin-bottom:8px;cursor:pointer}
+.mw-monet-row i.lead{color:#a78bfa;font-size:18px;margin-right:12px}
+.mw-monet-row .chev{color:#555;margin-left:auto}
+
+/* Slightly richer settings items */
+.settings-item{transition:background .15s}
+.settings-item:hover{background:#141414}

@@ -1,0 +1,20 @@
+{
+  "name": "Meetwoyou",
+  "short_name": "Meetwoyou",
+  "description": "Connect with the world instantly.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1d4ed8",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "./web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./web-app-manifest-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Messages", "short_name": "Chat", "url": "./messenger.html", "icons": [{ "src": "./web-app-manifest-192x192.png", "sizes": "192x192" }] },
+    { "name": "Reels", "short_name": "Reels", "url": "./dashboard.html#reels" }
+  ],
+  "categories": ["social", "communication", "lifestyle"]
+}
